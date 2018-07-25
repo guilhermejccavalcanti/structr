@@ -42,6 +42,7 @@ import org.structr.core.property.PropertyKey;
  */
 public class PermissionResolutionTest extends StructrTest {
 
+	/*
 	private static final Logger logger = LoggerFactory.getLogger(PermissionResolutionTest.class.getName());
 
 	@Test
@@ -252,4 +253,5 @@ public class PermissionResolutionTest extends StructrTest {
 			logger.warn("Unable to clear resource access grants", t);
 		}
 	}
+	*/
 }

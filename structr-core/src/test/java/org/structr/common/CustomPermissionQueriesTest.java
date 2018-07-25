@@ -40,6 +40,7 @@ public class CustomPermissionQueriesTest extends StructrTest {
 
 	private static final Logger logger = LoggerFactory.getLogger(CustomPermissionQueriesTest.class.getName());
 
+	/*
 	@Test
 	public void test01SimplePermissionResolutionRead() {
 
@@ -269,4 +270,5 @@ public class CustomPermissionQueriesTest extends StructrTest {
 			logger.warn("Unable to clear resource access grants", t);
 		}
 	}
+	*/
 }

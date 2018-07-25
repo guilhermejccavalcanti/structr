@@ -103,6 +103,9 @@ public class AdvancedCypherQuery implements PageableQuery {
 					buf.append(buffer);
 				}
 
+				buf.append(" ");
+				buf.append(index.getSecurityStatement(queryContext, typeLabels.size() > 0 ? typeLabels.get(0) : null));
+
 				buf.append(index.getQuerySuffix());
 				break;
 
@@ -114,6 +117,9 @@ public class AdvancedCypherQuery implements PageableQuery {
 					buf.append(" WHERE ");
 					buf.append(buffer);
 				}
+
+				buf.append(" ");
+				buf.append(index.getSecurityStatement(queryContext, typeLabels.size() > 0 ? typeLabels.get(0) : null));
 
 				buf.append(index.getQuerySuffix());
 				break;
@@ -129,6 +135,9 @@ public class AdvancedCypherQuery implements PageableQuery {
 						buf.append(" WHERE ");
 						buf.append(buffer);
 					}
+
+					buf.append(" ");
+					buf.append(index.getSecurityStatement(queryContext, typeLabels.size() > 0 ? typeLabels.get(0) : null));
 
 					buf.append(index.getQuerySuffix());
 

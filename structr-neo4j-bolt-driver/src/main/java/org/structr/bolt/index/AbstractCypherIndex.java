@@ -162,6 +162,9 @@ public abstract class AbstractCypherIndex<T extends PropertyContainer> implement
 		return getResult(query);
 	}
 
+	// ----- protected -----
+	protected abstract String getSecurityStatement(QueryContext context, String targetNodeType);
+
 	// ----- interface QueryFactory -----
 	@Override
 	public boolean createQuery(final QueryFactory parent, final QueryPredicate predicate, final AdvancedCypherQuery query, final boolean isFirst) {

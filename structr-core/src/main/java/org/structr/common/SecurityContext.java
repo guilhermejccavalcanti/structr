@@ -497,7 +497,6 @@ public class SecurityContext {
 
 			return true;
 		}
-
 		return node.isGranted(Permission.read, this);
 	}
 

@@ -20,6 +20,7 @@ package org.structr.bolt.index;
 
 import org.structr.api.QueryResult;
 import org.structr.api.graph.Relationship;
+import org.structr.api.search.QueryContext;
 import org.structr.api.util.QueryUtils;
 import org.structr.bolt.BoltDatabaseService;
 import org.structr.bolt.mapper.RelationshipRelationshipMapper;
@@ -78,6 +79,12 @@ public class CypherRelationshipIndex extends AbstractCypherIndex<Relationship> {
 	@Override
 	public String getQuerySuffix() {
 		return " RETURN DISTINCT n";
+	}
+
+	@Override
+	protected String getSecurityStatement(QueryContext context, String targetNodeType){
+
+		return "";
 	}
 
 	@Override

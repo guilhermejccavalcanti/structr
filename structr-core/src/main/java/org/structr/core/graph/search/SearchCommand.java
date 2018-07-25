@@ -46,6 +46,7 @@ import org.structr.core.Result;
 import org.structr.core.app.StructrApp;
 import org.structr.core.entity.AbstractNode;
 import org.structr.core.entity.AbstractRelationship;
+import org.structr.core.entity.Principal;
 import org.structr.core.graph.Factory;
 import org.structr.core.graph.NodeInterface;
 import org.structr.core.graph.NodeServiceCommand;
@@ -224,6 +225,14 @@ public abstract class SearchCommand<S extends PropertyContainer, T extends Graph
 				}
 
 				// do query
+				QueryContext context = getQueryContext();
+				Principal user = securityContext.getUser(false);
+				if (user != null) {
+					context.setAdmin(user.isAdmin());
+					context.setAuth(true);
+					context.setUuid(user.getUuid());
+				}
+
 				final QueryResult hits = index.query(getQueryContext(), rootGroup);
 				intermediateResult     = factory.instantiate(hits);
 

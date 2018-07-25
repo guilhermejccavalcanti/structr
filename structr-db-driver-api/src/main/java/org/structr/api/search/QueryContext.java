@@ -22,7 +22,12 @@ package org.structr.api.search;
  * Context object for index queries.
  */
 public class QueryContext {
+	// User properties
+	private boolean isAuth = false;
+	private boolean isAdmin = false;
+	private String uuid = null;
 
+	// Query properties
 	private boolean sliced = false;
 	private int skip = -1;
 	private int limit = -1;
@@ -62,4 +67,27 @@ public class QueryContext {
 		return this.isPing;
 	}
 
+	public boolean isAuth() {
+		return isAuth;
+	}
+
+	public void setAuth(boolean auth) {
+		isAuth = auth;
+	}
+
+	public boolean isAdmin() {
+		return isAdmin;
+	}
+
+	public void setAdmin(boolean admin) {
+		isAdmin = admin;
+	}
+
+	public String getUuid() {
+		return uuid;
+	}
+
+	public void setUuid(String uuid) {
+		this.uuid = uuid;
+	}
 }

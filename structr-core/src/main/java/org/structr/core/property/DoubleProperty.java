@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2010-2014 Morgner UG (haftungsbeschr√§nkt)
+ * Copyright (C) 2010-2014 Morgner UG (haftungsbeschr‰nkt)
  *
  * This file is part of Structr <http://structr.org>.
  *
@@ -41,164 +41,134 @@ import org.structr.core.graph.search.SearchAttribute;
  *
  * @author Christian Morgner
  */
-public class DoubleProperty extends AbstractPrimitiveProperty<Double> {
+public class DoubleProperty extends AbstractPrimitiveProperty<Double> implements NumericalPropertyKey<Double> {
 
-	private static final Logger logger = Logger.getLogger(DoubleProperty.class.getName());
+    private static final Logger logger = Logger.getLogger(DoubleProperty.class.getName());
 
-	public DoubleProperty(final String name) {
-		this(name, name, null);
-	}
+    public DoubleProperty(final String name) {
+        this(name, name, null);
+    }
 
-	public DoubleProperty(final String jsonName, final String dbName) {
-		this(jsonName, dbName, null);
-	}
+    public DoubleProperty(final String jsonName, final String dbName) {
+        this(jsonName, dbName, null);
+    }
 
-	public DoubleProperty(final String name, final PropertyValidator<Double>... validators) {
-		this(name, name, null, validators);
-	}
+    public DoubleProperty(final String name, final PropertyValidator<Double>... validators) {
+        this(name, name, null, validators);
+    }
 
-	public DoubleProperty(final String name, final Double defaultValue, final PropertyValidator<Double>... validators) {
-		this(name, name, defaultValue, validators);
-	}
+    public DoubleProperty(final String name, final Double defaultValue, final PropertyValidator<Double>... validators) {
+        this(name, name, defaultValue, validators);
+    }
 
-	public DoubleProperty(final String jsonName, final String dbName, final Double defaultValue, final PropertyValidator<Double>... validators) {
+    public DoubleProperty(final String jsonName, final String dbName, final Double defaultValue, final PropertyValidator<Double>... validators) {
+        super(jsonName, dbName, defaultValue);
+        if (jsonName.equals("latitude") || jsonName.equals("longitude")) {
+            nodeIndices.add(NodeIndex.layer);
+            passivelyIndexed();
+        }
+        for (PropertyValidator<Double> validator : validators) {
+            addValidator(validator);
+        }
+    }
 
-		super(jsonName, dbName, defaultValue);
+    @Override
+    public String typeName() {
+        return "Double";
+    }
 
-		if (jsonName.equals("latitude") || jsonName.equals("longitude")) {
+    @Override
+    public Integer getSortType() {
+        return SortField.DOUBLE;
+    }
 
-			// add layer node index and make
-			// this property be indexed at the
-			// end of the transaction instead
-			// of on setProperty
-			nodeIndices.add(NodeIndex.layer);
-			passivelyIndexed();
-		}
+    @Override
+    public PropertyConverter<Double, ?> databaseConverter(SecurityContext securityContext) {
+        return null;
+    }
 
-		for (PropertyValidator<Double> validator : validators) {
-			addValidator(validator);
-		}
-	}
+    @Override
+    public PropertyConverter<Double, ?> databaseConverter(SecurityContext securityContext, GraphObject entity) {
+        return null;
+    }
 
-	@Override
-	public String typeName() {
-		return "Double";
-	}
+    @Override
+    public PropertyConverter<?, Double> inputConverter(SecurityContext securityContext) {
+        return new InputConverter(securityContext);
+    }
 
-	@Override
-	public Integer getSortType() {
-		return SortField.DOUBLE;
-	}
+    @Override
+    public Double convertToNumber(Double source) {
+        return source;
+    }
 
-	@Override
-	public PropertyConverter<Double, ?> databaseConverter(SecurityContext securityContext) {
-		return null;
-	}
+    protected class InputConverter extends PropertyConverter<Object, Double> {
 
-	@Override
-	public PropertyConverter<Double, ?> databaseConverter(SecurityContext securityContext, GraphObject entity) {
-		return null;
-	}
+        public InputConverter(SecurityContext securityContext) {
+            super(securityContext);
+        }
 
-	@Override
-	public PropertyConverter<?, Double> inputConverter(SecurityContext securityContext) {
-		return new InputConverter(securityContext);
-	}
+        @Override
+        public Object revert(Double source) throws FrameworkException {
+            if (source == null) {
+                return null;
+            }
+            final boolean lenient = Boolean.parseBoolean(StructrApp.getConfigurationValue("json.lenient", "false"));
+            if (!lenient) {
+                if (Double.isNaN(source)) {
+                    return null;
+                }
+                if (Double.isInfinite(source)) {
+                    return null;
+                }
+            }
+            return source;
+        }
 
-	protected class InputConverter extends PropertyConverter<Object, Double> {
+        @Override
+        public Double convert(Object source) throws FrameworkException {
+            if (source == null) {
+                return null;
+            }
+            if (source instanceof Number) {
+                return ((Number) source).doubleValue();
+            }
+            if (source instanceof String && StringUtils.isNotBlank((String) source)) {
+                try {
+                    return Double.valueOf(source.toString());
+                } catch (Throwable t) {
+                    logger.log(Level.WARNING, "Unable to convert {0} to Double.", source);
+                    throw new FrameworkException(declaringClass.getSimpleName(), new NumberToken(DoubleProperty.this));
+                }
+            }
+            return null;
+        }
+    }
 
-		public InputConverter(SecurityContext securityContext) {
-			super(securityContext);
-		}
+    @Override
+    public Object fixDatabaseProperty(Object value) {
+        if (value != null) {
+            if (value instanceof Double) {
+                return value;
+            }
+            if (value instanceof Number) {
+                return ((Number) value).doubleValue();
+            }
+            try {
+                return Double.parseDouble(value.toString());
+            } catch (Throwable t) {
+            }
+        }
+        return null;
+    }
 
-		@Override
-		public Object revert(Double source) throws FrameworkException {
+    @Override
+    public SearchAttribute getSearchAttribute(SecurityContext securityContext, BooleanClause.Occur occur, Double searchValue, boolean exactMatch, final Query query) {
+        return new DoubleSearchAttribute(this, searchValue, occur, exactMatch);
+    }
 
-			if (source == null) {
-				return null;
-			}
-
-			final boolean lenient = Boolean.parseBoolean(StructrApp.getConfigurationValue("json.lenient", "false"));
-
-			if (!lenient) {
-
-				if (Double.isNaN(source)) {
-					return null;
-				}
-
-				if (Double.isInfinite(source)) {
-					return null;
-				}
-
-			}
-
-			return source;
-		}
-
-		@Override
-		public Double convert(Object source) throws FrameworkException {
-
-			if (source == null) {
-				return null;
-			}
-
-			if (source instanceof Number) {
-
-				return ((Number) source).doubleValue();
-
-			}
-
-			if (source instanceof String && StringUtils.isNotBlank((String) source)) {
-
-				try {
-					return Double.valueOf(source.toString());
-
-				} catch (Throwable t) {
-
-					logger.log(Level.WARNING, "Unable to convert {0} to Double.", source);
-
-					throw new FrameworkException(declaringClass.getSimpleName(), new NumberToken(DoubleProperty.this));
-				}
-			}
-
-			return null;
-		}
-	}
-
-	@Override
-	public Object fixDatabaseProperty(Object value) {
-
-		if (value != null) {
-
-			if (value instanceof Double) {
-				return value;
-			}
-
-			if (value instanceof Number) {
-				return ((Number) value).doubleValue();
-			}
-
-			try {
-
-				return Double.parseDouble(value.toString());
-
-			} catch (Throwable t) {
-
-				// no chance, give up..
-			}
-		}
-
-		return null;
-	}
-
-	@Override
-	public SearchAttribute getSearchAttribute(SecurityContext securityContext, BooleanClause.Occur occur, Double searchValue, boolean exactMatch, final Query query) {
-		return new DoubleSearchAttribute(this, searchValue, occur, exactMatch);
-	}
-
-	@Override
-	public void index(GraphObject entity, Object value) {
-		super.index(entity, value != null ? ValueContext.numeric((Number) fixDatabaseProperty(value)) : value);
-	}
-
+    @Override
+    public void index(GraphObject entity, Object value) {
+        super.index(entity, value != null ? ValueContext.numeric((Number) fixDatabaseProperty(value)) : value);
+    }
 }

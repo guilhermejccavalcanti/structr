@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2010-2014 Morgner UG (haftungsbeschränkt)
+ * Copyright (C) 2010-2014 Morgner UG (haftungsbeschr�nkt)
  *
  * This file is part of Structr <http://structr.org>.
  *
@@ -49,8 +49,6 @@ import org.structr.core.entity.GenericNode;
 import org.structr.core.graph.GraphDatabaseCommand;
 import org.structr.core.graph.NodeInterface;
 import org.structr.core.graph.RelationshipInterface;
-import org.structr.core.log.ReadLogCommand;
-import org.structr.core.log.WriteLogCommand;
 import org.structr.core.property.PropertyMap;
 import org.structr.files.ftp.FtpService;
 import org.structr.module.JarConfigurationProvider;
@@ -61,7 +59,6 @@ import org.structr.web.entity.User;
 import org.structr.web.servlet.HtmlServlet;
 import org.structr.websocket.servlet.WebSocketServlet;
 
-//~--- classes ----------------------------------------------------------------
 /**
  * Base class for all structr UI tests
  *
@@ -71,184 +68,168 @@ import org.structr.websocket.servlet.WebSocketServlet;
  */
 public class StructrUiTest extends TestCase {
 
-	private static final Logger logger = Logger.getLogger(StructrUiTest.class.getName());
+    private static final Logger logger = Logger.getLogger(StructrUiTest.class.getName());
 
-	//~--- fields ---------------------------------------------------------
-	protected StructrConf config = new StructrConf();
-	protected GraphDatabaseCommand graphDbCommand = null;
-	protected SecurityContext securityContext = null;
-	protected ReadLogCommand readLogCommand;
-	protected WriteLogCommand writeLogCommand;
+    //~--- fields ---------------------------------------------------------
+    protected StructrConf config = new StructrConf();
 
-	protected App app = null;
+    protected GraphDatabaseCommand graphDbCommand = null;
 
-	// the jetty server
-	private boolean running = false;
-	protected String basePath;
+    protected SecurityContext securityContext = null;
 
-	protected static final String prot = "http://";
-//	protected static final String contextPath = "/";
-	protected static final String restUrl = "/structr/rest";
-	protected static final String htmlUrl = "/structr/html";
-	protected static final String wsUrl = "/structr/ws";
-	protected static final String host = "localhost";
-	protected static final int httpPort = 8875;
-	protected static final int ftpPort = 8876;
+    protected App app = null;
 
-	protected static String baseUri;
+    // the jetty server
+    private boolean running = false;
 
-	static {
+    protected String basePath;
 
-		// check character set
-		checkCharset();
+    protected static final String prot = "http://";
 
-		baseUri = prot + host + ":" + httpPort + htmlUrl + "/";
-		// configure RestAssured
-		RestAssured.basePath = restUrl;
-		RestAssured.baseURI = prot + host + ":" + httpPort;
-		RestAssured.port = httpPort;
+    //	protected static final String contextPath = "/";
+    protected static final String restUrl = "/structr/rest";
 
-	}
+    protected static final String htmlUrl = "/structr/html";
 
-	//~--- methods --------------------------------------------------------
-	@Override
-	protected void setUp() throws Exception {
+    protected static final String wsUrl = "/structr/ws";
 
-		System.out.println("\n######################################################################################");
-		System.out.println("# Starting " + getClass().getSimpleName() + "#" + getName());
-		System.out.println("######################################################################################");
+    protected static final String host = "localhost";
 
-		config = Services.getBaseConfiguration();
+    protected static final int httpPort = 8875;
 
-		final Date now = new Date();
-		final long timestamp = now.getTime();
+    protected static final int ftpPort = 8876;
 
-		basePath = "/tmp/structr-test-" + timestamp;
+    protected static String baseUri;
 
-		// enable "just testing" flag to avoid JAR resource scanning
-		config.setProperty(Services.TESTING, "true");
+    static {
+        // check character set
+        checkCharset();
+        baseUri = prot + host + ":" + httpPort + htmlUrl + "/";
+        // configure RestAssured
+        RestAssured.basePath = restUrl;
+        RestAssured.baseURI = prot + host + ":" + httpPort;
+        RestAssured.port = httpPort;
+    }
 
-		config.setProperty(Services.CONFIGURATION, JarConfigurationProvider.class.getName());
-		config.setProperty(Services.CONFIGURED_SERVICES, "NodeService LogService FtpService HttpService SchemaService");
-		config.setProperty(Services.TMP_PATH, "/tmp/");
-		config.setProperty(Services.BASE_PATH, basePath);
-		config.setProperty(Services.DATABASE_PATH, basePath + "/db");
-		config.setProperty(Services.FILES_PATH, basePath + "/files");
-		config.setProperty(Services.LOG_DATABASE_PATH, basePath + "/logDb.dat");
-		config.setProperty(Services.TCP_PORT, "13465");
-		config.setProperty(Services.UDP_PORT, "13466");
-		config.setProperty(Services.SUPERUSER_USERNAME, "superadmin");
-		config.setProperty(Services.SUPERUSER_PASSWORD, "sehrgeheim");
+    static {
+        // check character set
+        checkCharset();
+        baseUri = prot + host + ":" + httpPort + htmlUrl + "/";
+        // configure RestAssured
+        RestAssured.basePath = restUrl;
+        RestAssured.baseURI = prot + host + ":" + httpPort;
+        RestAssured.port = httpPort;
+    }
 
-		config.setProperty(FtpService.APPLICATION_FTP_PORT, Integer.toString(ftpPort));
+    //~--- methods --------------------------------------------------------
+    @Override
+    protected void setUp() throws Exception {
+        config.setProperty("NodeExtender.log", "true");
+        setUp(null);
+    }
 
-		// configure servlets
-		config.setProperty(HttpService.APPLICATION_TITLE, "structr unit test app" + timestamp);
-		config.setProperty(HttpService.APPLICATION_HOST, host);
-		config.setProperty(HttpService.APPLICATION_HTTP_PORT, Integer.toString(httpPort));
-		config.setProperty(HttpService.SERVLETS, "JsonRestServlet WebSocketServlet HtmlServlet");
+    protected void setUp(final Map<String, Object> additionalConfig) {
+        System.out.println("\n######################################################################################");
+        System.out.println("# Starting " + getClass().getSimpleName() + "#" + getName());
+        System.out.println("######################################################################################");
+        config = Services.getBaseConfiguration();
+        final Date now = new Date();
+        final long timestamp = now.getTime();
+        basePath = "/tmp/structr-test-" + timestamp;
+        // enable "just testing" flag to avoid JAR resource scanning
+        config.setProperty(Services.TESTING, "true");
+        config.setProperty(Services.CONFIGURATION, JarConfigurationProvider.class.getName());
+        config.setProperty(Services.CONFIGURED_SERVICES, "NodeService FtpService HttpService SchemaService");
+        config.setProperty(Services.TMP_PATH, "/tmp/");
+        config.setProperty(Services.BASE_PATH, basePath);
+        config.setProperty(Services.DATABASE_PATH, basePath + "/db");
+        config.setProperty(Services.FILES_PATH, basePath + "/files");
+        config.setProperty(Services.LOG_DATABASE_PATH, basePath + "/logDb.dat");
+        config.setProperty(Services.TCP_PORT, "13465");
+        config.setProperty(Services.UDP_PORT, "13466");
+        config.setProperty(Services.SUPERUSER_USERNAME, "superadmin");
+        config.setProperty(Services.SUPERUSER_PASSWORD, "sehrgeheim");
+        config.setProperty(FtpService.APPLICATION_FTP_PORT, Integer.toString(ftpPort));
+        // configure servlets
+        config.setProperty(HttpService.APPLICATION_TITLE, "structr unit test app" + timestamp);
+        config.setProperty(HttpService.APPLICATION_HOST, host);
+        config.setProperty(HttpService.APPLICATION_HTTP_PORT, Integer.toString(httpPort));
+        config.setProperty(HttpService.SERVLETS, "JsonRestServlet WebSocketServlet HtmlServlet");
+        config.setProperty("JsonRestServlet.class", JsonRestServlet.class.getName());
+        config.setProperty("JsonRestServlet.path", restUrl);
+        config.setProperty("JsonRestServlet.resourceprovider", UiResourceProvider.class.getName());
+        config.setProperty("JsonRestServlet.authenticator", UiAuthenticator.class.getName());
+        config.setProperty("JsonRestServlet.user.class", User.class.getName());
+        config.setProperty("JsonRestServlet.user.autocreate", "false");
+        config.setProperty("JsonRestServlet.defaultview", PropertyView.Public);
+        config.setProperty("JsonRestServlet.outputdepth", "3");
+        config.setProperty("WebSocketServlet.class", WebSocketServlet.class.getName());
+        config.setProperty("WebSocketServlet.path", wsUrl);
+        config.setProperty("WebSocketServlet.resourceprovider", UiResourceProvider.class.getName());
+        config.setProperty("WebSocketServlet.authenticator", UiAuthenticator.class.getName());
+        config.setProperty("WebSocketServlet.user.class", User.class.getName());
+        config.setProperty("WebSocketServlet.user.autocreate", "false");
+        config.setProperty("WebSocketServlet.defaultview", PropertyView.Public);
+        config.setProperty("WebSocketServlet.outputdepth", "3");
+        config.setProperty("HtmlServlet.class", HtmlServlet.class.getName());
+        config.setProperty("HtmlServlet.path", htmlUrl);
+        config.setProperty("HtmlServlet.resourceprovider", UiResourceProvider.class.getName());
+        config.setProperty("HtmlServlet.authenticator", UiAuthenticator.class.getName());
+        config.setProperty("HtmlServlet.user.class", User.class.getName());
+        config.setProperty("HtmlServlet.user.autocreate", "false");
+        config.setProperty("HtmlServlet.defaultview", PropertyView.Public);
+        config.setProperty("HtmlServlet.outputdepth", "3");
+        // Configure resource handlers
+        config.setProperty(HttpService.RESOURCE_HANDLERS, "StructrUiHandler");
+        config.setProperty("StructrUiHandler.contextPath", "/structr");
+        config.setProperty("StructrUiHandler.resourceBase", "src/main/resources/structr");
+        config.setProperty("StructrUiHandler.directoriesListed", Boolean.toString(false));
+        config.setProperty("StructrUiHandler.welcomeFiles", "index.html");
+        if (additionalConfig != null) {
+            config.putAll(additionalConfig);
+        }
+        final Services services = Services.getInstance(config);
+        // wait for service layer to be initialized
+        do {
+            try {
+                Thread.sleep(100);
+            } catch (Throwable t) {
+            }
+        } while (!services.isInitialized());
+        securityContext = SecurityContext.getSuperUserInstance();
+        app = StructrApp.getInstance(securityContext);
+        graphDbCommand = app.command(GraphDatabaseCommand.class);
+    }
 
-		config.setProperty("JsonRestServlet.class", JsonRestServlet.class.getName());
-		config.setProperty("JsonRestServlet.path", restUrl);
-		config.setProperty("JsonRestServlet.resourceprovider", UiResourceProvider.class.getName());
-		config.setProperty("JsonRestServlet.authenticator", UiAuthenticator.class.getName());
-		config.setProperty("JsonRestServlet.user.class", User.class.getName());
-		config.setProperty("JsonRestServlet.user.autocreate", "false");
-		config.setProperty("JsonRestServlet.defaultview", PropertyView.Public);
-		config.setProperty("JsonRestServlet.outputdepth", "3");
+    public void test00() {
+    }
 
-		config.setProperty("WebSocketServlet.class", WebSocketServlet.class.getName());
-		config.setProperty("WebSocketServlet.path", wsUrl);
-		config.setProperty("WebSocketServlet.resourceprovider", UiResourceProvider.class.getName());
-		config.setProperty("WebSocketServlet.authenticator", UiAuthenticator.class.getName());
-		config.setProperty("WebSocketServlet.user.class", User.class.getName());
-		config.setProperty("WebSocketServlet.user.autocreate", "false");
-		config.setProperty("WebSocketServlet.defaultview", PropertyView.Public);
-		config.setProperty("WebSocketServlet.outputdepth", "3");
+    @Override
+    protected void tearDown() throws Exception {
+        Services.getInstance().shutdown();
+        File testDir = new File(basePath);
+        int count = 0;
+        while (testDir.exists() && count++ < 10) {
+            try {
+                if (testDir.isDirectory()) {
+                    FileUtils.deleteDirectory(testDir);
+                } else {
+                    testDir.delete();
+                }
+            } catch (Throwable t) {
+            }
+            try {
+                Thread.sleep(500);
+            } catch (Throwable t) {
+            }
+        }
+        super.tearDown();
+        System.out.println("######################################################################################");
+        System.out.println("# " + getClass().getSimpleName() + "#" + getName() + " finished.");
+        System.out.println("######################################################################################\n");
+    }
 
-		config.setProperty("HtmlServlet.class", HtmlServlet.class.getName());
-		config.setProperty("HtmlServlet.path", htmlUrl);
-		config.setProperty("HtmlServlet.resourceprovider", UiResourceProvider.class.getName());
-		config.setProperty("HtmlServlet.authenticator", UiAuthenticator.class.getName());
-		config.setProperty("HtmlServlet.user.class", User.class.getName());
-		config.setProperty("HtmlServlet.user.autocreate", "false");
-		config.setProperty("HtmlServlet.defaultview", PropertyView.Public);
-		config.setProperty("HtmlServlet.outputdepth", "3");
-
-		// Configure resource handlers
-		config.setProperty(HttpService.RESOURCE_HANDLERS, "StructrUiHandler");
-
-		config.setProperty("StructrUiHandler.contextPath", "/structr");
-		config.setProperty("StructrUiHandler.resourceBase", "src/main/resources/structr");
-		config.setProperty("StructrUiHandler.directoriesListed", Boolean.toString(false));
-		config.setProperty("StructrUiHandler.welcomeFiles", "index.html");
-
-		config.setProperty("NodeExtender.log", "true");
-		
-		final Services services = Services.getInstance(config);
-
-		// wait for service layer to be initialized
-		do {
-			try {
-				Thread.sleep(100);
-			} catch (Throwable t) {
-			}
-
-		} while (!services.isInitialized());
-
-		securityContext = SecurityContext.getSuperUserInstance();
-
-		app = StructrApp.getInstance(securityContext);
-
-		graphDbCommand = app.command(GraphDatabaseCommand.class);
-		writeLogCommand = app.command(WriteLogCommand.class);
-		readLogCommand = app.command(ReadLogCommand.class);
-
-	}
-
-	public void test00() {
-	}
-
-	@Override
-	protected void tearDown() throws Exception {
-
-		Services.getInstance().shutdown();
-
-		File testDir = new File(basePath);
-		int count = 0;
-
-		// try up to 10 times to delete the directory
-		while (testDir.exists() && count++ < 10) {
-
-			try {
-
-				if (testDir.isDirectory()) {
-
-					FileUtils.deleteDirectory(testDir);
-
-				} else {
-
-					testDir.delete();
-				}
-
-			} catch (Throwable t) {
-			}
-
-			try {
-				Thread.sleep(500);
-			} catch (Throwable t) {
-			}
-		}
-
-		super.tearDown();
-
-		System.out.println("######################################################################################");
-		System.out.println("# " + getClass().getSimpleName() + "#" + getName() + " finished.");
-		System.out.println("######################################################################################\n");
-
-	}
-
-	/**
+    /**
 	 * Recursive method used to find all classes in a given directory and
 	 * subdirs.
 	 *
@@ -258,79 +239,57 @@ public class StructrUiTest extends TestCase {
 	 * @return The classes
 	 * @throws ClassNotFoundException
 	 */
-	private static List<Class> findClasses(File directory, String packageName) throws ClassNotFoundException {
+    private static List<Class> findClasses(File directory, String packageName) throws ClassNotFoundException {
+        List<Class> classes = new ArrayList<>();
+        if (!directory.exists()) {
+            return classes;
+        }
+        File[] files = directory.listFiles();
+        for (File file : files) {
+            if (file.isDirectory()) {
+                assert !file.getName().contains(".");
+                classes.addAll(findClasses(file, packageName + "." + file.getName()));
+            } else {
+                if (file.getName().endsWith(".class")) {
+                    classes.add(Class.forName(packageName + '.' + file.getName().substring(0, file.getName().length() - 6)));
+                }
+            }
+        }
+        return classes;
+    }
 
-		List<Class> classes = new ArrayList<>();
+    protected <T extends NodeInterface> List<T> createTestNodes(final Class<T> type, final int number) throws FrameworkException {
+        final PropertyMap props = new PropertyMap();
+        props.put(AbstractNode.type, type.getSimpleName());
+        List<T> nodes = new LinkedList<>();
+        for (int i = 0; i < number; i++) {
+            props.put(AbstractNode.name, type.getSimpleName() + i);
+            nodes.add(app.create(type, props));
+        }
+        return nodes;
+    }
 
-		if (!directory.exists()) {
+    protected <T extends NodeInterface> List<T> createTestNodes(final Class<T> type, final int number, final PropertyMap props) throws FrameworkException {
+        List<T> nodes = new LinkedList<>();
+        for (int i = 0; i < number; i++) {
+            nodes.add(app.create(type, props));
+        }
+        return nodes;
+    }
 
-			return classes;
-		}
+    protected List<RelationshipInterface> createTestRelationships(final Class relType, final int number) throws FrameworkException {
+        List<GenericNode> nodes = createTestNodes(GenericNode.class, 2);
+        final GenericNode startNode = nodes.get(0);
+        final GenericNode endNode = nodes.get(1);
+        List<RelationshipInterface> rels = new LinkedList<>();
+        for (int i = 0; i < number; i++) {
+            rels.add(app.create(startNode, endNode, relType));
+        }
+        return rels;
+    }
 
-		File[] files = directory.listFiles();
-
-		for (File file : files) {
-
-			if (file.isDirectory()) {
-
-				assert !file.getName().contains(".");
-
-				classes.addAll(findClasses(file, packageName + "." + file.getName()));
-
-			} else if (file.getName().endsWith(".class")) {
-
-				classes.add(Class.forName(packageName + '.' + file.getName().substring(0, file.getName().length() - 6)));
-			}
-
-		}
-
-		return classes;
-
-	}
-
-	protected <T extends NodeInterface> List<T> createTestNodes(final Class<T> type, final int number) throws FrameworkException {
-
-		final PropertyMap props = new PropertyMap();
-		props.put(AbstractNode.type, type.getSimpleName());
-
-		List<T> nodes = new LinkedList<>();
-
-		for (int i = 0; i < number; i++) {
-			props.put(AbstractNode.name, type.getSimpleName() + i);
-			nodes.add(app.create(type, props));
-		}
-
-		return nodes;
-	}
-
-	protected <T extends NodeInterface> List<T> createTestNodes(final Class<T> type, final int number, final PropertyMap props) throws FrameworkException {
-
-		List<T> nodes = new LinkedList<>();
-
-		for (int i = 0; i < number; i++) {
-			nodes.add(app.create(type, props));
-		}
-
-		return nodes;
-	}
-
-	protected List<RelationshipInterface> createTestRelationships(final Class relType, final int number) throws FrameworkException {
-
-		List<GenericNode> nodes = createTestNodes(GenericNode.class, 2);
-		final GenericNode startNode = nodes.get(0);
-		final GenericNode endNode   = nodes.get(1);
-
-		List<RelationshipInterface> rels = new LinkedList<>();
-
-		for (int i = 0; i < number; i++) {
-			rels.add(app.create(startNode, endNode, relType));
-		}
-
-		return rels;
-	}
-
-	//~--- get methods ----------------------------------------------------
-	/**
+    //~--- get methods ----------------------------------------------------
+    /**
 	 * Get classes in given package and subpackages, accessible from the
 	 * context class loader
 	 *
@@ -339,194 +298,96 @@ public class StructrUiTest extends TestCase {
 	 * @throws ClassNotFoundException
 	 * @throws IOException
 	 */
-	protected static List<Class> getClasses(String packageName) throws ClassNotFoundException, IOException {
+    protected static List<Class> getClasses(String packageName) throws ClassNotFoundException, IOException {
+        ClassLoader classLoader = Thread.currentThread().getContextClassLoader();
+        assert classLoader != null;
+        String path = packageName.replace('.', '/');
+        Enumeration<URL> resources = classLoader.getResources(path);
+        List<File> dirs = new ArrayList<>();
+        while (resources.hasMoreElements()) {
+            URL resource = resources.nextElement();
+            dirs.add(new File(resource.getFile()));
+        }
+        List<Class> classList = new ArrayList<>();
+        for (File directory : dirs) {
+            classList.addAll(findClasses(directory, packageName));
+        }
+        return classList;
+    }
 
-		ClassLoader classLoader = Thread.currentThread().getContextClassLoader();
+    protected String getUuidFromLocation(String location) {
+        return location.substring(location.lastIndexOf("/") + 1);
+    }
 
-		assert classLoader != null;
+    protected void grant(final String signature, final long flags, final boolean reset) {
+        if (reset) {
+            RestAssured.given().contentType("application/json; charset=UTF-8").header("X-User", "superadmin").header("X-Password", "sehrgeheim").expect().statusCode(200).when().delete("/resource_access");
+        }
+        RestAssured.given().contentType("application/json; charset=UTF-8").header("X-User", "superadmin").header("X-Password", "sehrgeheim").body(" { \'signature\' : \'" + signature + "\', \'flags\': " + flags + ", \'visibleToPublicUsers\': true } ").expect().statusCode(201).when().post("/resource_access");
+    }
 
-		String path = packageName.replace('.', '/');
-		Enumeration<URL> resources = classLoader.getResources(path);
-		List<File> dirs = new ArrayList<>();
+    protected void testGet(final String resource, final String username, final String password, final int expectedStatusCode) {
+        RestAssured.given().contentType("application/json; charset=UTF-8").header("X-User", username).header("X-Password", password).expect().statusCode(expectedStatusCode).when().get(resource);
+    }
 
-		while (resources.hasMoreElements()) {
+    protected void testPost(final String resource, final String username, final String password, final String body, final int expectedStatusCode) {
+        RestAssured.given().contentType("application/json; charset=UTF-8").header("X-User", username).header("X-Password", password).body(body).expect().statusCode(expectedStatusCode).when().post(resource);
+    }
 
-			URL resource = resources.nextElement();
+    protected void testPut(final String resource, final String username, final String password, final String body, final int expectedStatusCode) {
+        RestAssured.given().contentType("application/json; charset=UTF-8").header("X-User", username).header("X-Password", password).body(body).expect().statusCode(expectedStatusCode).when().put(resource);
+    }
 
-			dirs.add(new File(resource.getFile()));
+    protected void testDelete(final String resource, final String username, final String password, final int expectedStatusCode) {
+        RestAssured.given().contentType("application/json; charset=UTF-8").header("X-User", username).header("X-Password", password).expect().statusCode(expectedStatusCode).when().delete(resource);
+    }
 
-		}
+    private static void checkCharset() {
+        System.out.println("######### Charset settings ##############");
+        System.out.println("Default Charset=" + Charset.defaultCharset());
+        System.out.println("file.encoding=" + System.getProperty("file.encoding"));
+        System.out.println("Default Charset=" + Charset.defaultCharset());
+        System.out.println("Default Charset in Use=" + getEncodingInUse());
+        System.out.println("This should look like the umlauts of \'a\', \'o\', \'u\' and \'ss\': ????");
+        System.out.println("#########################################");
+    }
 
-		List<Class> classList = new ArrayList<>();
+    private static String getEncodingInUse() {
+        OutputStreamWriter writer = new OutputStreamWriter(new ByteArrayOutputStream());
+        return writer.getEncoding();
+    }
 
-		for (File directory : dirs) {
+    // disabled to be able to test on windows systems
+    //	public void testCharset() {
+    //		assertTrue(StringUtils.remove(getEncodingInUse().toLowerCase(), "-").equals("utf8"));
+    //	}
+    protected void makePublic(final Object... objects) throws FrameworkException {
+        for (Object obj : objects) {
+            ((GraphObject) obj).setProperty(GraphObject.visibleToPublicUsers, true);
+        }
+    }
 
-			classList.addAll(findClasses(directory, packageName));
-		}
+    protected <T extends java.lang.Object> List<T> toList(final T... elements) {
+        return Arrays.asList(elements);
+    }
 
-		return classList;
+    protected Map<String, byte[]> toMap(final Pair... pairs) {
+        final Map<String, byte[]> map = new LinkedHashMap<>();
+        for (final Pair pair : pairs) {
+            map.put(pair.key, pair.value);
+        }
+        return map;
+    }
 
-	}
+    public static class Pair {
 
-	protected String getUuidFromLocation(String location) {
-		return location.substring(location.lastIndexOf("/") + 1);
-	}
+        public String key = null;
 
-	protected void grant(final String signature, final long flags, final boolean reset) {
+        public byte[] value = null;
 
-		if (reset) {
-
-			// delete existing grants
-			RestAssured
-
-				.given()
-					.contentType("application/json; charset=UTF-8")
-					.header("X-User", "superadmin")
-					.header("X-Password", "sehrgeheim")
-
-				.expect()
-					.statusCode(200)
-
-				.when()
-					.delete("/resource_access");
-		}
-
-		// create new grant
-		RestAssured
-
-			.given()
-				.contentType("application/json; charset=UTF-8")
-				.header("X-User", "superadmin")
-				.header("X-Password", "sehrgeheim")
-				.body(" { 'signature' : '" + signature + "', 'flags': " + flags + ", 'visibleToPublicUsers': true } ")
-
-			.expect()
-				.statusCode(201)
-
-			.when()
-				.post("/resource_access");
-	}
-
-	protected void testGet(final String resource, final String username, final String password, final int expectedStatusCode) {
-
-		RestAssured
-
-			.given()
-				.contentType("application/json; charset=UTF-8")
-				.header("X-User", username)
-				.header("X-Password", password)
-
-			.expect()
-				.statusCode(expectedStatusCode)
-
-			.when()
-				.get(resource);
-
-	}
-
-	protected void testPost(final String resource, final String username, final String password, final String body, final int expectedStatusCode) {
-
-		RestAssured
-
-			.given()
-				.contentType("application/json; charset=UTF-8")
-				.header("X-User", username)
-				.header("X-Password", password)
-				.body(body)
-
-			.expect()
-				.statusCode(expectedStatusCode)
-
-			.when()
-				.post(resource);
-	}
-
-	protected void testPut(final String resource, final String username, final String password, final String body, final int expectedStatusCode) {
-
-		RestAssured
-
-			.given()
-				.contentType("application/json; charset=UTF-8")
-				.header("X-User", username)
-				.header("X-Password", password)
-				.body(body)
-
-			.expect()
-				.statusCode(expectedStatusCode)
-
-			.when()
-				.put(resource);
-	}
-
-	protected void testDelete(final String resource, final String username, final String password, final int expectedStatusCode) {
-
-		RestAssured
-
-			.given()
-				.contentType("application/json; charset=UTF-8")
-				.header("X-User", username)
-				.header("X-Password", password)
-
-			.expect()
-				.statusCode(expectedStatusCode)
-
-			.when()
-				.delete(resource);
-	}
-
-	private static void checkCharset() {
-
-		System.out.println("######### Charset settings ##############");
-		System.out.println("Default Charset=" + Charset.defaultCharset());
-		System.out.println("file.encoding=" + System.getProperty("file.encoding"));
-		System.out.println("Default Charset=" + Charset.defaultCharset());
-		System.out.println("Default Charset in Use=" + getEncodingInUse());
-		System.out.println("This should look like the umlauts of 'a', 'o', 'u' and 'ss': äöüß");
-		System.out.println("#########################################");
-
-	}
-
-	private static String getEncodingInUse() {
-		OutputStreamWriter writer = new OutputStreamWriter(new ByteArrayOutputStream());
-		return writer.getEncoding();
-	}
-
-	// disabled to be able to test on windows systems
-//	public void testCharset() {
-//		assertTrue(StringUtils.remove(getEncodingInUse().toLowerCase(), "-").equals("utf8"));
-//	}
-	protected void makePublic(final Object... objects) throws FrameworkException {
-
-		for (Object obj : objects) {
-			((GraphObject) obj).setProperty(GraphObject.visibleToPublicUsers, true);
-		}
-
-	}
-
-	protected <T> List<T> toList(final T... elements) {
-		return Arrays.asList(elements);
-	}
-
-	protected Map<String, byte[]> toMap(final Pair... pairs) {
-
-		final Map<String, byte[]> map = new LinkedHashMap<>();
-
-		for (final Pair pair : pairs) {
-			map.put(pair.key, pair.value);
-		}
-
-		return map;
-	}
-
-	public static class Pair {
-
-		public String key   = null;
-		public byte[] value = null;
-
-		public Pair(final String key, final byte[] value) {
-
-			this.key = key;
-			this.value = value;
-		}
-	}
+        public Pair(final String key, final byte[] value) {
+            this.key = key;
+            this.value = value;
+        }
+    }
 }

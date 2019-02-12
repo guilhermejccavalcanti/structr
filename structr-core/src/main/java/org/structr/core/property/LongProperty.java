@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2010-2014 Morgner UG (haftungsbeschr√§nkt)
+ * Copyright (C) 2010-2014 Morgner UG (haftungsbeschr‰nkt)
  *
  * This file is part of Structr <http://structr.org>.
  *
@@ -39,143 +39,132 @@ import org.structr.core.graph.search.SearchAttribute;
  *
  * @author Christian Morgner
  */
-public class LongProperty extends AbstractPrimitiveProperty<Long> {
+public class LongProperty extends AbstractPrimitiveProperty<Long> implements NumericalPropertyKey<Long> {
 
-	private static final Logger logger = Logger.getLogger(DoubleProperty.class.getName());
-	public static final String LONG_EMPTY_FIELD_VALUE = NumericUtils.longToPrefixCoded(Long.MIN_VALUE);
+    private static final Logger logger = Logger.getLogger(DoubleProperty.class.getName());
 
-	public LongProperty(final String name) {
-		super(name);
-	}
+    public static final String LONG_EMPTY_FIELD_VALUE = NumericUtils.longToPrefixCoded(Long.MIN_VALUE);
 
-//	public LongProperty(final String jsonName, final String dbName) {
-//		this(jsonName, dbName, null);
-//	}
-//
-//	public LongProperty(final String name, final Long defaultValue) {
-//		this(name, name, defaultValue);
-//	}
-//
-//	public LongProperty(final String name, final PropertyValidator<Long>... validators) {
-//		this(name, name, null, validators);
-//	}
-//
-//	public LongProperty(final String name, final Long defaultValue, final PropertyValidator<Long>... validators) {
-//		this(name, name, defaultValue, validators);
-//	}
-//
-//	public LongProperty(final String jsonName, final String dbName, final Long defaultValue, final PropertyValidator<Long>... validators) {
-//		super(jsonName, dbName, defaultValue);
-//
-//		for (PropertyValidator<Long> validator : validators) {
-//			addValidator(validator);
-//		}
-//	}
+    public LongProperty(final String name) {
+        super(name);
+    }
 
-	@Override
-	public String typeName() {
-		return "Long";
-	}
+    //	public LongProperty(final String jsonName, final String dbName) {
+    //		this(jsonName, dbName, null);
+    //	}
+    //
+    //	public LongProperty(final String name, final Long defaultValue) {
+    //		this(name, name, defaultValue);
+    //	}
+    //
+    //	public LongProperty(final String name, final PropertyValidator<Long>... validators) {
+    //		this(name, name, null, validators);
+    //	}
+    //
+    //	public LongProperty(final String name, final Long defaultValue, final PropertyValidator<Long>... validators) {
+    //		this(name, name, defaultValue, validators);
+    //	}
+    //
+    //	public LongProperty(final String jsonName, final String dbName, final Long defaultValue, final PropertyValidator<Long>... validators) {
+    //		super(jsonName, dbName, defaultValue);
+    //
+    //		for (PropertyValidator<Long> validator : validators) {
+    //			addValidator(validator);
+    //		}
+    //	}
+    @Override
+    public String typeName() {
+        return "Long";
+    }
 
-	@Override
-	public Integer getSortType() {
-		return SortField.LONG;
-	}
+    @Override
+    public Integer getSortType() {
+        return SortField.LONG;
+    }
 
-	@Override
-	public PropertyConverter<Long, Long> databaseConverter(SecurityContext securityContext) {
-		return null;
-	}
+    @Override
+    public PropertyConverter<Long, Long> databaseConverter(SecurityContext securityContext) {
+        return null;
+    }
 
-	@Override
-	public PropertyConverter<Long, Long> databaseConverter(SecurityContext securityContext, GraphObject entity) {
-		return null;
-	}
+    @Override
+    public PropertyConverter<Long, Long> databaseConverter(SecurityContext securityContext, GraphObject entity) {
+        return null;
+    }
 
-	@Override
-	public PropertyConverter<?, Long> inputConverter(SecurityContext securityContext) {
-		return new InputConverter(securityContext);
-	}
+    @Override
+    public PropertyConverter<?, Long> inputConverter(SecurityContext securityContext) {
+        return new InputConverter(securityContext);
+    }
 
-	protected class InputConverter extends PropertyConverter<Object, Long> {
+    @Override
+    public Long convertToNumber(Double source) {
+        if (source != null) {
+            return source.longValue();
+        }
+        return null;
+    }
 
-		public InputConverter(SecurityContext securityContext) {
-			super(securityContext);
-		}
+    protected class InputConverter extends PropertyConverter<Object, Long> {
 
-		@Override
-		public Object revert(Long source) throws FrameworkException {
-			return source;
-		}
+        public InputConverter(SecurityContext securityContext) {
+            super(securityContext);
+        }
 
-		@Override
-		public Long convert(Object source) throws FrameworkException {
+        @Override
+        public Object revert(Long source) throws FrameworkException {
+            return source;
+        }
 
-			if (source == null) return null;
+        @Override
+        public Long convert(Object source) throws FrameworkException {
+            if (source == null) {
+                return null;
+            }
+            if (source instanceof Number) {
+                return ((Number) source).longValue();
+            }
+            if (source instanceof String && StringUtils.isNotBlank((String) source)) {
+                try {
+                    return Long.valueOf(source.toString());
+                } catch (Throwable t) {
+                    logger.log(Level.WARNING, "Unable to convert {0} to Long.", source);
+                    throw new FrameworkException(declaringClass.getSimpleName(), new NumberToken(LongProperty.this));
+                }
+            }
+            return null;
+        }
+    }
 
-			if (source instanceof Number) {
+    @Override
+    public Object fixDatabaseProperty(Object value) {
+        if (value != null) {
+            if (value instanceof Long) {
+                return value;
+            }
+            if (value instanceof Number) {
+                return ((Number) value).longValue();
+            }
+            try {
+                return Long.parseLong(value.toString());
+            } catch (Throwable t) {
+            }
+        }
+        return null;
+    }
 
-				return ((Number)source).longValue();
+    @Override
+    public SearchAttribute getSearchAttribute(SecurityContext securityContext, BooleanClause.Occur occur, Long searchValue, boolean exactMatch, final Query query) {
+        return new LongSearchAttribute(this, searchValue, occur, exactMatch);
+    }
 
-			}
+    @Override
+    public void index(GraphObject entity, Object value) {
+        super.index(entity, value != null ? ValueContext.numeric((Number) fixDatabaseProperty(value)) : value);
+    }
 
-			if (source instanceof String && StringUtils.isNotBlank((String) source)) {
-
-				try {
-					return Long.valueOf(source.toString());
-
-				} catch (Throwable t) {
-
-					logger.log(Level.WARNING, "Unable to convert {0} to Long.", source);
-
-					throw new FrameworkException(declaringClass.getSimpleName(), new NumberToken(LongProperty.this));
-				}
-			}
-
-			return null;
-		}
-	}
-
-	@Override
-	public Object fixDatabaseProperty(Object value) {
-
-		if (value != null) {
-
-			if (value instanceof Long) {
-				return value;
-			}
-
-			if (value instanceof Number) {
-				return ((Number)value).longValue();
-			}
-
-			try {
-
-				return Long.parseLong(value.toString());
-
-			} catch (Throwable t) {
-
-				// no chance, give up..
-			}
-		}
-
-		return null;
-	}
-
-	@Override
-	public SearchAttribute getSearchAttribute(SecurityContext securityContext, BooleanClause.Occur occur, Long searchValue, boolean exactMatch, final Query query) {
-		return new LongSearchAttribute(this, searchValue, occur, exactMatch);
-	}
-
-	@Override
-	public void index(GraphObject entity, Object value) {
-		super.index(entity, value != null ? ValueContext.numeric((Number)fixDatabaseProperty(value)) : value);
-	}
-
-	@Override
-	public String getValueForEmptyFields() {
-		return LONG_EMPTY_FIELD_VALUE;
-	}
-
-
+    @Override
+    public String getValueForEmptyFields() {
+        return LONG_EMPTY_FIELD_VALUE;
+    }
 }
